@@ -25,6 +25,7 @@ public class Gem : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             PlayerController.Instance.numberOfGems += 1;
+            AudioManager.Instance.collectGem.Play();
             Destroy(gameObject);
         }
     }

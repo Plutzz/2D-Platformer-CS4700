@@ -17,7 +17,7 @@ public class Blade : MonoBehaviour
     public void Start()
     {
         transform.position = startPoint.position;
-        transform.DOMoveX(endPoint.position.x, moveTime).SetEase(ease).SetLoops(-1, LoopType.Yoyo);
+        transform.DOMove(endPoint.position, moveTime).SetEase(ease).SetLoops(-1, LoopType.Yoyo);
     }
     
     private void Update()

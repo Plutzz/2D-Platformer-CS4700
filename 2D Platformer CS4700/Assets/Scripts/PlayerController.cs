@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,6 +13,8 @@ public class PlayerController : MonoBehaviour
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Animator anim;
+    [SerializeField] private TextMeshProUGUI gemText;
+    [SerializeField] private GameOverMenu gameOverMenu;
     
     [Header("StateMachine")]
     [SerializeField] private States startState;
@@ -71,11 +74,6 @@ public class PlayerController : MonoBehaviour
         GatherInput();
         UpdateState(Time.deltaTime);
         CheckTransitions();
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
     }
     
     
@@ -98,6 +96,7 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
+        AudioManager.Instance.jump.Play();
         timeOfLastJumpInput = -1f;
         rb.velocity = new Vector2(rb.velocity.x, jumpAmount);
     }
@@ -135,7 +134,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case States.hurt:
                 rb.simulated = false;
+                AudioManager.Instance.playerDeath.Play();
                 anim.Play("Hurt");
+                gameOverMenu.ShowGameOverMenu();
                 break;
         }
     }
@@ -143,6 +144,7 @@ public class PlayerController : MonoBehaviour
     private void UpdateState(float dt)
     {
         stateUptime += dt;
+        gemText.text = numberOfGems.ToString();
         switch (currentState)
         {
             case States.move:

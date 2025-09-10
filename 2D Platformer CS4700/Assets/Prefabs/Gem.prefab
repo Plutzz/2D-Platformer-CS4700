@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animMoveAmount: 0.2
   animTime: 1
-  ease: 4
+  ease: 7
 --- !u!58 &8213391018604878108
 CircleCollider2D:
   m_ObjectHideFlags: 0
