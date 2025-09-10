@@ -1,15 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
-{ 
+{
+    // Singleton Reference
+    public static PlayerController Instance;
     
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
-
     [SerializeField] private Animator anim;
+    
     [Header("StateMachine")]
     [SerializeField] private States startState;
     private States currentState;
@@ -17,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Ground Movement")] 
     [SerializeField] private float groundSpeed;
-    [SerializeField] private float groundDrag, groundCheckLength;
+    [SerializeField] private float groundDrag, groundCheckLength, groundCheckOffset;
     private float timeSinceLastGroundCheck;
     private bool grounded;
 
@@ -25,17 +28,35 @@ public class PlayerController : MonoBehaviour
     
     [Header("Air Movement")]
     [SerializeField] private float airSpeed, jumpAmount;
+    [SerializeField] private float jumpBuffer;
 
     [Header("Input")] 
     private float moveX;
+    private float timeOfLastJumpInput = -10f;
+
+    [Header("Stats")] 
+    public int numberOfGems;
     
     public enum States
     {
         move,
         idle,
-        air
+        air,
+        hurt
     }
-    
+
+
+    private void Awake()
+    {
+        // if there is already a player in our scene, delete this one
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -69,21 +90,28 @@ public class PlayerController : MonoBehaviour
     private void GatherInput()
     {
         moveX = Input.GetAxis("Horizontal");
+        if (Input.GetButtonDown("Jump"))
+        {
+            timeOfLastJumpInput = Time.time;
+        }
     }
 
     private void Jump()
     {
+        timeOfLastJumpInput = -1f;
         rb.velocity = new Vector2(rb.velocity.x, jumpAmount);
     }
 
     public void CheckGrounded()
     {
         timeSinceLastGroundCheck += Time.deltaTime;
-        if (timeSinceLastGroundCheck > .1f)
+        if (timeSinceLastGroundCheck > .05f)
         {
             timeSinceLastGroundCheck = 0;
-            Debug.DrawRay(transform.position, Vector3.down * groundCheckLength, Color.red);
-            grounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckLength, groundLayer);
+            Debug.DrawRay(transform.position + Vector3.right * groundCheckOffset, Vector3.down * groundCheckLength, Color.red);
+            Debug.DrawRay(transform.position - Vector3.right * groundCheckOffset, Vector3.down * groundCheckLength, Color.red);
+            grounded = Physics2D.Raycast(transform.position + Vector3.right * groundCheckOffset, Vector2.down, groundCheckLength, groundLayer) 
+                       || Physics2D.Raycast(transform.position - Vector3.right * groundCheckOffset, Vector2.down, groundCheckLength, groundLayer);
         }
         
     }
@@ -104,6 +132,10 @@ public class PlayerController : MonoBehaviour
                 break;
             case States.air:
                 rb.drag = 0;
+                break;
+            case States.hurt:
+                rb.simulated = false;
+                anim.Play("Hurt");
                 break;
         }
     }
@@ -148,6 +180,8 @@ public class PlayerController : MonoBehaviour
                 {
                     anim.Play("Fall");
                 }
+                break;
+            case States.hurt:
                 
                 break;
         }
@@ -166,14 +200,23 @@ public class PlayerController : MonoBehaviour
             case States.air:
                 
                 break;
+            case States.hurt:
+                
+                break;
         }
     }
 
     public void CheckTransitions()
     {
-        if ((currentState == States.move || currentState == States.idle) && Input.GetButtonDown("Jump"))
+        if ((currentState == States.move || currentState == States.idle) && Time.time - timeOfLastJumpInput < jumpBuffer)
         {
             Jump();
+            ChangeState(States.air);
+            return;
+        }
+        
+        if ((currentState == States.move || currentState == States.idle) && !grounded)
+        {
             ChangeState(States.air);
             return;
         }
@@ -195,4 +238,24 @@ public class PlayerController : MonoBehaviour
         }
     }
     #endregion
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        Debug.Log("Hit");
+        if (other.gameObject.CompareTag("Hazard"))
+        {
+            Debug.Log("Hit Hazard");
+            ChangeState(States.hurt);
+        }
+    }
+    
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("Hit");
+        if (other.gameObject.CompareTag("Hazard"))
+        {
+            Debug.Log("Hit Hazard");
+            ChangeState(States.hurt);
+        }
+    }
 }
