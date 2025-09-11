@@ -234,6 +234,7 @@ public class PlayerController : MonoBehaviour
         
         if ((currentState == States.move || currentState == States.idle) && !grounded)
         {
+            rb.velocity = new Vector2(rb.velocity.x, 0);
             ChangeState(States.air);
             return;
         }

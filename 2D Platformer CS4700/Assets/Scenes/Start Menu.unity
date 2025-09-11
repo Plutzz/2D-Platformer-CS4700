@@ -5322,6 +5322,7 @@ GameObject:
   - component: {fileID: 303440487}
   - component: {fileID: 303440489}
   - component: {fileID: 303440488}
+  - component: {fileID: 303440490}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -5368,7 +5369,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MonoLife
+  m_text: '<wave><bounce>Monolife</bounce></wave>
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8eb81d41d6634b34dafefaa19d739733, type: 2}
   m_sharedMaterial: {fileID: 1207937906248393615, guid: 8eb81d41d6634b34dafefaa19d739733,
@@ -5446,6 +5449,40 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 303440486}
   m_CullTransparentMesh: 1
+--- !u!114 &303440490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303440486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ace8ced0e81c847968cdca0aeda757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  typewriterStartsAutomatically: 0
+  animationLoop: 0
+  timeScale: 0
+  _text: '<wave><bounce>Monolife</bounce></wave>
+
+'
+  useDynamicScaling: 1
+  referenceFontSize: 10
+  isResettingTimeOnNewText: 1
+  useDefaultDatabases: 0
+  databaseBehaviors: {fileID: 11400000, guid: a72ffde609ac6ef4899de25c1dc2bd03, type: 2}
+  databaseAppearances: {fileID: 11400000, guid: f114525cf188a1940945cff9632b47bf,
+    type: 2}
+  useDefaultStyleSheet: 1
+  styleSheet: {fileID: 0}
+  databaseActions: {fileID: 11400000, guid: ca263392f5fdbd544a1fc81f18b86378, type: 2}
+  defaultAppearancesTags:
+  - size
+  defaultDisappearancesTags:
+  - fade
+  defaultBehaviorsTags: []
+  defaultTagsMode: 0
 --- !u!1 &317259734
 GameObject:
   m_ObjectHideFlags: 0

@@ -39,8 +39,14 @@ public class WinMenu : MonoBehaviour
     public IEnumerator ShowGameOverMenuAnimation()
     {
         yield return new WaitForSeconds(1f);
+        
         gemOverlay.parent = transform;
-        gemOverlay.localPosition = new Vector3(75, 0, 0);
+        gemOverlay.localPosition = new Vector3(75, -75, 0);
+        
+        Timer.Instance.transform.parent = transform;
+        Timer.Instance.transform.localPosition = new Vector3(0, 75, 0);
+        Timer.Instance.timerActive = false;
+        
         rectTransform.DOLocalMoveY(endYValue, animTime).SetEase(ease);
         yield return new WaitForSeconds(animTime);
         canReset = true;
