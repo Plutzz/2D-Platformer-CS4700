@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Animator anim;
     [SerializeField] private TextMeshProUGUI gemText;
     [SerializeField] private GameOverMenu gameOverMenu;
+    [SerializeField] private WinMenu winMenu;
     
     [Header("StateMachine")]
     [SerializeField] private States startState;
@@ -23,7 +24,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Ground Movement")] 
     [SerializeField] private float groundSpeed;
-    [SerializeField] private float groundDrag, groundCheckLength, groundCheckOffset;
+    [SerializeField] private float groundDrag, groundCheckLength, groundCheckOffset, platformMoveFactor;
     private float timeSinceLastGroundCheck;
     private bool grounded;
 
@@ -39,7 +40,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Stats")] 
     public int numberOfGems;
-    
+
+    private Rigidbody2D currentPlatform;
     public enum States
     {
         move,
@@ -74,6 +76,13 @@ public class PlayerController : MonoBehaviour
         GatherInput();
         UpdateState(Time.deltaTime);
         CheckTransitions();
+
+        if (numberOfGems >= 4 && rb.simulated)
+        {
+            winMenu.ShowMenu();
+            rb.simulated = false;
+        }
+        
     }
     
     
@@ -145,10 +154,15 @@ public class PlayerController : MonoBehaviour
     {
         stateUptime += dt;
         gemText.text = numberOfGems.ToString();
+        Vector2 platformVelocity = Vector2.zero;
+        if (currentPlatform != null)
+        {
+            platformVelocity = new Vector2(currentPlatform.velocity.x, Mathf.Clamp(currentPlatform.velocity.y, -100f, 0));
+        }
         switch (currentState)
         {
             case States.move:
-                rb.velocity = new Vector2(moveX * groundSpeed, rb.velocity.y);
+                rb.velocity = new Vector2(moveX * groundSpeed, rb.velocity.y) + platformVelocity * platformMoveFactor;
                 if (moveX < -0.01f)
                 {
                     anim.transform.localScale = new Vector3(-1, 1, 1);
@@ -160,6 +174,7 @@ public class PlayerController : MonoBehaviour
                 break;
             
             case States.idle:
+                rb.velocity = platformVelocity * platformMoveFactor;
                 break;
             
             case States.air:
@@ -222,18 +237,25 @@ public class PlayerController : MonoBehaviour
             ChangeState(States.air);
             return;
         }
-
-        if (currentState == States.air && grounded && rb.velocity.y < 0.1f)
+        
+        
+        Vector2 platformVelocity = Vector2.zero;
+        if (currentPlatform != null)
+        {
+            platformVelocity = new Vector2(currentPlatform.velocity.x, currentPlatform.velocity.y);
+        }
+        
+        if (currentState == States.air && grounded && rb.velocity.y - platformVelocity.y < 0.1f)
         {
             ChangeState(States.idle);
             return;
         }
-        if (currentState == States.move && Mathf.Abs(rb.velocity.x) < 0.5f)
+        if (currentState == States.move && Mathf.Abs(moveX) <= 0.05f)
         {
             ChangeState(States.idle);
             return;
         }
-        if (currentState == States.idle && Mathf.Abs(moveX) >= 0.1f)
+        if (currentState == States.idle && Mathf.Abs(moveX) >= 0.05f)
         {
             ChangeState(States.move);
             return;
@@ -244,10 +266,27 @@ public class PlayerController : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D other)
     {
         Debug.Log("Hit");
+        
         if (other.gameObject.CompareTag("Hazard"))
         {
             Debug.Log("Hit Hazard");
             ChangeState(States.hurt);
+        }
+        
+        if (other.gameObject.CompareTag("Platform"))
+        {
+            currentPlatform = other.gameObject.GetComponent<Rigidbody2D>();
+        }
+
+
+        
+    }
+
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Platform") && other.gameObject == currentPlatform.gameObject)
+        {
+            currentPlatform = null;
         }
     }
     
@@ -258,6 +297,12 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Hit Hazard");
             ChangeState(States.hurt);
+        }
+        if (other.gameObject.TryGetComponent(out Spring spring))
+        {
+            rb.velocity = new Vector2(rb.velocity.x, spring.force);
+            spring.PlayAnimation();
+            ChangeState(States.air);
         }
     }
 }

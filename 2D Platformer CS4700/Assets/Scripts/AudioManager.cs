@@ -7,7 +7,7 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
 
-    public AudioSource collectGem, jump, playerDeath;
+    public AudioSource collectGem, jump, playerDeath, spring;
     
     
     private void Awake()
