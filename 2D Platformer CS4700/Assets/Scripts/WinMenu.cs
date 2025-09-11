@@ -33,6 +33,7 @@ public class WinMenu : MonoBehaviour
     public void ShowMenu()
     {
         StartCoroutine(ShowGameOverMenuAnimation());
+        PlayerPrefs.SetInt("unlockedHardMode", 1);
     }
 
     public IEnumerator ShowGameOverMenuAnimation()

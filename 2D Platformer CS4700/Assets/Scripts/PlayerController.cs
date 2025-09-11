@@ -77,7 +77,7 @@ public class PlayerController : MonoBehaviour
         UpdateState(Time.deltaTime);
         CheckTransitions();
 
-        if (numberOfGems >= 4 && rb.simulated)
+        if (numberOfGems >= 10 && rb.simulated)
         {
             winMenu.ShowMenu();
             rb.simulated = false;
