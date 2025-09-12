@@ -96,7 +96,7 @@ public class PlayerController : MonoBehaviour
 
     private void GatherInput()
     {
-        moveX = Input.GetAxis("Horizontal");
+        moveX = Input.GetAxisRaw("Horizontal");
         if (Input.GetButtonDown("Jump"))
         {
             timeOfLastJumpInput = Time.time;
